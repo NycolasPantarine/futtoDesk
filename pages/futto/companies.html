@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FuttoDesk — Empresas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../css/main.css" />
+</head>
+<body>
+
+<div class="app-layout">
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-icon">F</div>
+      <span class="sidebar-brand-name">FuttoDesk</span>
+    </div>
+    <nav class="sidebar-nav">
+      <span class="nav-section-label">Atendimento</span>
+      <a href="dashboard.html" class="nav-item"><span class="nav-icon">⊞</span> Dashboard</a>
+      <a href="tickets.html" class="nav-item"><span class="nav-icon">🎫</span> Chamados</a>
+      <span class="nav-section-label">Cadastros</span>
+      <a href="companies.html" class="nav-item active"><span class="nav-icon">🏢</span> Empresas</a>
+      <a href="contacts.html" class="nav-item"><span class="nav-icon">👤</span> Contatos</a>
+      <a href="agents.html" class="nav-item"><span class="nav-icon">👥</span> Agentes</a>
+      <span class="nav-section-label">Sistema</span>
+      <a href="settings.html" class="nav-item"><span class="nav-icon">⚙</span> Configurações</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-user-avatar" id="user-avatar">N</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name" id="user-name">Carregando...</div>
+          <div class="sidebar-user-role" id="user-role">Agente</div>
+        </div>
+      </div>
+      <button class="nav-item" id="btn-logout" style="width:100%;margin-top:4px;background:none;border:none;cursor:pointer;color:rgba(255,255,255,0.4);font-size:13px;text-align:left;">
+        <span class="nav-icon">→</span> Sair
+      </button>
+    </div>
+  </aside>
+
+  <div class="main-content">
+
+    <div class="topbar">
+      <span class="topbar-title">Empresas</span>
+      <div class="topbar-actions">
+        <button class="btn btn-primary btn-sm" id="btn-new-group">+ Novo grupo</button>
+        <button class="btn btn-primary btn-sm" id="btn-new-company">+ Nova empresa</button>
+      </div>
+    </div>
+
+    <div class="page-content">
+
+      <!-- MODAL GRUPO -->
+      <div id="modal-group" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;align-items:center;justify-content:center;">
+        <div class="card" style="width:100%;max-width:480px;margin:24px;">
+          <div class="card-header">
+            <span class="card-title" id="modal-group-title">Novo grupo</span>
+            <button id="btn-close-group" style="background:none;border:none;cursor:pointer;font-size:20px;color:var(--text-muted);">×</button>
+          </div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:16px;">
+            <input type="hidden" id="group-id" />
+            <div class="form-group">
+              <label class="form-label">Nome do grupo *</label>
+              <input class="form-input" type="text" id="group-name" placeholder="Ex: Grupo Cotribá" />
+            </div>
+            <div id="group-error" class="alert alert-error" style="display:none;"></div>
+            <div style="display:flex;gap:8px;justify-content:flex-end;">
+              <button class="btn btn-secondary" id="btn-cancel-group">Cancelar</button>
+              <button class="btn btn-primary" id="btn-save-group">Salvar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODAL EMPRESA -->
+      <div id="modal-company" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;align-items:center;justify-content:center;">
+        <div class="card" style="width:100%;max-width:480px;margin:24px;">
+          <div class="card-header">
+            <span class="card-title" id="modal-company-title">Nova empresa</span>
+            <button id="btn-close-company" style="background:none;border:none;cursor:pointer;font-size:20px;color:var(--text-muted);">×</button>
+          </div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:16px;">
+            <input type="hidden" id="company-id" />
+            <div class="form-group">
+              <label class="form-label">Grupo (opcional)</label>
+              <select class="form-input" id="company-group">
+                <option value="">Sem grupo</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Razão social *</label>
+              <input class="form-input" type="text" id="company-name" placeholder="Ex: Cotribá Cooperativa Agrícola" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">CNPJ *</label>
+              <input class="form-input" type="text" id="company-cnpj" placeholder="00.000.000/0000-00" maxlength="18" />
+            </div>
+            <div id="company-error" class="alert alert-error" style="display:none;"></div>
+            <div style="display:flex;gap:8px;justify-content:flex-end;">
+              <button class="btn btn-secondary" id="btn-cancel-company">Cancelar</button>
+              <button class="btn btn-primary" id="btn-save-company">Salvar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- GRUPOS E EMPRESAS -->
+      <div id="groups-container" style="display:flex;flex-direction:column;gap:16px;">
+        <div class="empty-state">
+          <div class="empty-state-icon">🏢</div>
+          <div class="empty-state-title">Carregando...</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="../../js/config.js"></script>
+<script>
+
+// =============================================
+// FUTTODESK — Empresas v1.0
+// =============================================
+
+let groups = [];
+let companies = [];
+
+async function init() {
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (!session) { window.location.href = '../../index.html'; return; }
+
+  const { data: profile } = await supabaseClient
+    .from('profiles').select('name, type').eq('id', session.user.id).single();
+
+  if (!profile || profile.type !== 'agent') { window.location.href = '../../index.html'; return; }
+
+  document.getElementById('user-name').textContent = profile.name;
+  document.getElementById('user-avatar').textContent = profile.name.charAt(0).toUpperCase();
+
+  await loadData();
+}
+
+async function loadData() {
+  const [{ data: g }, { data: c }] = await Promise.all([
+    supabaseClient.from('groups').select('*').order('name'),
+    supabaseClient.from('companies').select('*, groups(name)').order('name')
+  ]);
+
+  groups = g ?? [];
+  companies = c ?? [];
+
+  renderGroups();
+  populateGroupSelect();
+}
+
+function renderGroups() {
+  const container = document.getElementById('groups-container');
+
+  // Empresas sem grupo
+  const noGroup = companies.filter(c => !c.group_id);
+
+  // Monta HTML
+  let html = '';
+
+  // Empresas sem grupo
+  if (noGroup.length > 0) {
+    html += `
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Sem grupo</span>
+          <span style="font-size:13px;color:var(--text-muted);">${noGroup.length} empresa(s)</span>
+        </div>
+        <div class="table-wrapper">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Razão social</th>
+                <th>CNPJ</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              ${noGroup.map(c => companyRow(c)).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>`;
+  }
+
+  // Grupos com empresas
+  groups.forEach(g => {
+    const gCompanies = companies.filter(c => c.group_id === g.id);
+    html += `
+      <div class="card">
+        <div class="card-header" style="justify-content:space-between;">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span class="card-title">🏢 ${g.name}</span>
+            <span style="font-size:13px;color:var(--text-muted);">${gCompanies.length} empresa(s)</span>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-secondary btn-sm" onclick="openEditGroup('${g.id}', '${g.name.replace(/'/g, "\\'")}')">Editar</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteGroup('${g.id}')">Excluir</button>
+          </div>
+        </div>
+        <div class="table-wrapper">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Razão social</th>
+                <th>CNPJ</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              ${gCompanies.length > 0
+                ? gCompanies.map(c => companyRow(c)).join('')
+                : `<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:16px;">Nenhuma empresa neste grupo</td></tr>`
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>`;
+  });
+
+  if (!html) {
+    html = `
+      <div class="empty-state">
+        <div class="empty-state-icon">🏢</div>
+        <div class="empty-state-title">Nenhuma empresa cadastrada</div>
+        <div class="empty-state-desc">Clique em "Nova empresa" para começar.</div>
+      </div>`;
+  }
+
+  container.innerHTML = html;
+}
+
+function companyRow(c) {
+  return `
+    <tr>
+      <td>${c.name}</td>
+      <td style="font-family:monospace;">${c.cnpj}</td>
+      <td><span class="badge ${c.active ? 'badge-resolved' : 'badge-closed'}">${c.active ? 'Ativa' : 'Inativa'}</span></td>
+      <td style="text-align:right;">
+        <button class="btn btn-secondary btn-sm" onclick="openEditCompany('${c.id}')">Editar</button>
+      </td>
+    </tr>`;
+}
+
+function populateGroupSelect() {
+  const select = document.getElementById('company-group');
+  select.innerHTML = '<option value="">Sem grupo</option>';
+  groups.forEach(g => {
+    select.innerHTML += `<option value="${g.id}">${g.name}</option>`;
+  });
+}
+
+// =============================================
+// MODAL GRUPO
+// =============================================
+
+function openNewGroup() {
+  document.getElementById('group-id').value = '';
+  document.getElementById('group-name').value = '';
+  document.getElementById('group-error').style.display = 'none';
+  document.getElementById('modal-group-title').textContent = 'Novo grupo';
+  document.getElementById('modal-group').style.display = 'flex';
+}
+
+function openEditGroup(id, name) {
+  document.getElementById('group-id').value = id;
+  document.getElementById('group-name').value = name;
+  document.getElementById('group-error').style.display = 'none';
+  document.getElementById('modal-group-title').textContent = 'Editar grupo';
+  document.getElementById('modal-group').style.display = 'flex';
+}
+
+function closeGroupModal() {
+  document.getElementById('modal-group').style.display = 'none';
+}
+
+async function saveGroup() {
+  const id = document.getElementById('group-id').value;
+  const name = document.getElementById('group-name').value.trim();
+  const errorEl = document.getElementById('group-error');
+
+  if (!name) {
+    errorEl.textContent = 'Nome do grupo é obrigatório.';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  errorEl.style.display = 'none';
+
+  let error;
+  if (id) {
+    ({ error } = await supabaseClient.from('groups').update({ name }).eq('id', id));
+  } else {
+    ({ error } = await supabaseClient.from('groups').insert({ name }));
+  }
+
+  if (error) {
+    errorEl.textContent = 'Erro ao salvar grupo.';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  closeGroupModal();
+  await loadData();
+}
+
+async function deleteGroup(id) {
+  const hasCompanies = companies.some(c => c.group_id === id);
+  if (hasCompanies) {
+    alert('Este grupo possui empresas vinculadas. Remova ou mova as empresas antes de excluir o grupo.');
+    return;
+  }
+  if (!confirm('Excluir este grupo?')) return;
+  await supabaseClient.from('groups').delete().eq('id', id);
+  await loadData();
+}
+
+// =============================================
+// MODAL EMPRESA
+// =============================================
+
+function openNewCompany() {
+  document.getElementById('company-id').value = '';
+  document.getElementById('company-name').value = '';
+  document.getElementById('company-cnpj').value = '';
+  document.getElementById('company-group').value = '';
+  document.getElementById('company-error').style.display = 'none';
+  document.getElementById('modal-company-title').textContent = 'Nova empresa';
+  document.getElementById('modal-company').style.display = 'flex';
+}
+
+async function openEditCompany(id) {
+  const company = companies.find(c => c.id === id);
+  if (!company) return;
+
+  document.getElementById('company-id').value = company.id;
+  document.getElementById('company-name').value = company.name;
+  document.getElementById('company-cnpj').value = company.cnpj;
+  document.getElementById('company-group').value = company.group_id ?? '';
+  document.getElementById('company-error').style.display = 'none';
+  document.getElementById('modal-company-title').textContent = 'Editar empresa';
+  document.getElementById('modal-company').style.display = 'flex';
+}
+
+function closeCompanyModal() {
+  document.getElementById('modal-company').style.display = 'none';
+}
+
+function formatCNPJ(value) {
+  return value
+    .replace(/\D/g, '')
+    .replace(/^(\d{2})(\d)/, '$1.$2')
+    .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
+    .replace(/\.(\d{3})(\d)/, '.$1/$2')
+    .replace(/(\d{4})(\d)/, '$1-$2')
+    .slice(0, 18);
+}
+
+document.getElementById('company-cnpj').addEventListener('input', function() {
+  this.value = formatCNPJ(this.value);
+});
+
+async function saveCompany() {
+  const id = document.getElementById('company-id').value;
+  const name = document.getElementById('company-name').value.trim();
+  const cnpj = document.getElementById('company-cnpj').value.trim();
+  const group_id = document.getElementById('company-group').value || null;
+  const errorEl = document.getElementById('company-error');
+
+  if (!name || !cnpj) {
+    errorEl.textContent = 'Razão social e CNPJ são obrigatórios.';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  if (cnpj.replace(/\D/g, '').length !== 14) {
+    errorEl.textContent = 'CNPJ inválido.';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  errorEl.style.display = 'none';
+
+  let error;
+  if (id) {
+    ({ error } = await supabaseClient.from('companies').update({ name, cnpj, group_id }).eq('id', id));
+  } else {
+    ({ error } = await supabaseClient.from('companies').insert({ name, cnpj, group_id }));
+  }
+
+  if (error) {
+    errorEl.textContent = error.code === '23505'
+      ? 'Já existe uma empresa com este CNPJ.'
+      : 'Erro ao salvar empresa.';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  closeCompanyModal();
+  await loadData();
+}
+
+// =============================================
+// EVENTOS
+// =============================================
+
+document.getElementById('btn-new-group').addEventListener('click', openNewGroup);
+document.getElementById('btn-close-group').addEventListener('click', closeGroupModal);
+document.getElementById('btn-cancel-group').addEventListener('click', closeGroupModal);
+document.getElementById('btn-save-group').addEventListener('click', saveGroup);
+
+document.getElementById('btn-new-company').addEventListener('click', openNewCompany);
+document.getElementById('btn-close-company').addEventListener('click', closeCompanyModal);
+document.getElementById('btn-cancel-company').addEventListener('click', closeCompanyModal);
+document.getElementById('btn-save-company').addEventListener('click', saveCompany);
+
+document.getElementById('btn-logout').addEventListener('click', async () => {
+  await supabaseClient.auth.signOut();
+  window.location.href = '../../index.html';
+});
+
+init();
+</script>
+
+</body>
+</html>
