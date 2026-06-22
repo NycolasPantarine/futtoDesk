@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FuttoDesk — Painel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../css/main.css" />
+</head>
+<body>
+
+<div class="app-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-icon">F</div>
+      <span class="sidebar-brand-name">FuttoDesk</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <span class="nav-section-label">Atendimento</span>
+      <a href="dashboard.html" class="nav-item active">
+        <span class="nav-icon">⊞</span> Dashboard
+      </a>
+      <a href="tickets.html" class="nav-item">
+        <span class="nav-icon">🎫</span> Chamados
+      </a>
+
+      <span class="nav-section-label">Cadastros</span>
+      <a href="companies.html" class="nav-item">
+        <span class="nav-icon">🏢</span> Empresas
+      </a>
+      <a href="contacts.html" class="nav-item">
+        <span class="nav-icon">👤</span> Contatos
+      </a>
+      <a href="agents.html" class="nav-item">
+        <span class="nav-icon">👥</span> Agentes
+      </a>
+
+      <span class="nav-section-label">Sistema</span>
+      <a href="settings.html" class="nav-item">
+        <span class="nav-icon">⚙</span> Configurações
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-user-avatar" id="user-avatar">N</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name" id="user-name">Carregando...</div>
+          <div class="sidebar-user-role" id="user-role">Agente</div>
+        </div>
+      </div>
+      <button class="nav-item" id="btn-logout" style="width:100%;margin-top:4px;background:none;border:none;cursor:pointer;color:rgba(255,255,255,0.4);font-size:13px;text-align:left;">
+        <span class="nav-icon">→</span> Sair
+      </button>
+    </div>
+  </aside>
+
+  <!-- CONTEÚDO -->
+  <div class="main-content">
+
+    <div class="topbar">
+      <span class="topbar-title">Dashboard</span>
+      <div class="topbar-actions">
+        <button class="notif-btn" id="btn-notif" title="Notificações">
+          🔔
+          <span class="notif-badge" id="notif-count" style="display:none;">0</span>
+        </button>
+        <button class="btn btn-primary btn-sm" onclick="window.location.href='tickets-new.html'">
+          + Novo chamado
+        </button>
+      </div>
+    </div>
+
+    <div class="page-content">
+
+      <!-- CARDS DE RESUMO -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;">
+        <div class="card">
+          <div class="card-body" style="text-align:center;">
+            <div style="font-size:32px;font-weight:700;color:var(--status-open);" id="count-open">—</div>
+            <div style="font-size:13px;color:var(--text-muted);margin-top:4px;">Em aberto</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-body" style="text-align:center;">
+            <div style="font-size:32px;font-weight:700;color:var(--status-in-progress);" id="count-in-progress">—</div>
+            <div style="font-size:13px;color:var(--text-muted);margin-top:4px;">Em andamento</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-body" style="text-align:center;">
+            <div style="font-size:32px;font-weight:700;color:var(--status-waiting);" id="count-waiting">—</div>
+            <div style="font-size:13px;color:var(--text-muted);margin-top:4px;">Aguardando cliente</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-body" style="text-align:center;">
+            <div style="font-size:32px;font-weight:700;color:var(--status-resolved);" id="count-resolved">—</div>
+            <div style="font-size:13px;color:var(--text-muted);margin-top:4px;">Resolvidos hoje</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TICKETS RECENTES -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Chamados recentes</span>
+          <a href="tickets.html" style="font-size:13px;color:var(--brand-primary);">Ver todos →</a>
+        </div>
+        <div class="table-wrapper">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Título</th>
+                <th>Empresa</th>
+                <th>Tipo</th>
+                <th>Prioridade</th>
+                <th>Status</th>
+                <th>Aberto em</th>
+              </tr>
+            </thead>
+            <tbody id="tickets-tbody">
+              <tr>
+                <td colspan="7">
+                  <div class="empty-state">
+                    <div class="empty-state-icon">🎫</div>
+                    <div class="empty-state-title">Carregando chamados...</div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="../../js/config.js"></script>
+<script>
+// =============================================
+// FUTTODESK — Dashboard Futto v1.0
+// =============================================
+
+const statusLabels = {
+  open: 'Em aberto',
+  in_progress: 'Em andamento',
+  waiting_client: 'Aguardando',
+  resolved: 'Resolvido',
+  closed: 'Encerrado'
+};
+
+const statusBadge = {
+  open: 'badge-open',
+  in_progress: 'badge-in-progress',
+  waiting_client: 'badge-waiting',
+  resolved: 'badge-resolved',
+  closed: 'badge-closed'
+};
+
+const priorityLabels = {
+  low: 'Baixa',
+  medium: 'Média',
+  high: 'Alta',
+  urgent: 'Urgente'
+};
+
+const priorityBadge = {
+  low: 'badge-low',
+  medium: 'badge-medium',
+  high: 'badge-high',
+  urgent: 'badge-urgent'
+};
+
+const demandLabels = {
+  calculation: 'Cálculo',
+  admission: 'Admissão',
+  dismissal: 'Demissão',
+  register_change: 'Alt. Cadastral',
+  absence: 'Afastamento',
+  esocial: 'eSocial',
+  fgts: 'FGTS',
+  question: 'Dúvida',
+  other: 'Outros'
+};
+
+async function init() {
+  const { data: { session } } = await supabaseClient.auth.getSession();
+
+  if (!session) {
+    window.location.href = '../../index.html';
+    return;
+  }
+
+  // Carrega perfil do usuário
+  const { data: profile } = await supabaseClient
+    .from('profiles')
+    .select('name, type')
+    .eq('id', session.user.id)
+    .single();
+
+  if (!profile || profile.type !== 'agent') {
+    window.location.href = '../../index.html';
+    return;
+  }
+
+  // Atualiza sidebar
+  document.getElementById('user-name').textContent = profile.name;
+  document.getElementById('user-avatar').textContent = profile.name.charAt(0).toUpperCase();
+
+  // Verifica se é admin
+  const { data: agent } = await supabaseClient
+    .from('agents')
+    .select('role')
+    .eq('profile_id', session.user.id)
+    .single();
+
+  document.getElementById('user-role').textContent = agent?.role === 'admin' ? 'Admin' : 'Agente';
+
+  // Carrega contadores
+  await loadCounters();
+
+  // Carrega tickets recentes
+  await loadRecentTickets();
+
+  // Carrega notificações
+  await loadNotifications(session.user.id);
+}
+
+async function loadCounters() {
+  const statuses = ['open', 'in_progress', 'waiting_client'];
+  const ids = ['count-open', 'count-in-progress', 'count-waiting'];
+
+  for (let i = 0; i < statuses.length; i++) {
+    const { count } = await supabaseClient
+      .from('tickets')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', statuses[i])
+      .eq('active', true);
+
+    document.getElementById(ids[i]).textContent = count ?? 0;
+  }
+
+  // Resolvidos hoje
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const { count: resolvedToday } = await supabaseClient
+    .from('tickets')
+    .select('*', { count: 'exact', head: true })
+    .eq('status', 'resolved')
+    .gte('updated_at', today.toISOString());
+
+  document.getElementById('count-resolved').textContent = resolvedToday ?? 0;
+}
+
+async function loadRecentTickets() {
+  const { data: tickets, error } = await supabaseClient
+    .from('tickets')
+    .select(`
+      number,
+      title,
+      status,
+      priority,
+      demand_type,
+      created_at,
+      companies (name)
+    `)
+    .eq('active', true)
+    .order('created_at', { ascending: false })
+    .limit(10);
+
+  const tbody = document.getElementById('tickets-tbody');
+
+  if (error || !tickets || tickets.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="7">
+          <div class="empty-state">
+            <div class="empty-state-icon">🎫</div>
+            <div class="empty-state-title">Nenhum chamado ainda</div>
+            <div class="empty-state-desc">Os chamados aparecerão aqui assim que forem abertos.</div>
+          </div>
+        </td>
+      </tr>`;
+    return;
+  }
+
+  tbody.innerHTML = tickets.map(t => `
+    <tr style="cursor:pointer;" onclick="window.location.href='ticket-detail.html?id=${t.number}'">
+      <td style="font-weight:600;color:var(--brand-primary);">#${t.number}</td>
+      <td>${t.title}</td>
+      <td>${t.companies?.name ?? '—'}</td>
+      <td>${demandLabels[t.demand_type] ?? '—'}</td>
+      <td><span class="badge ${priorityBadge[t.priority]}">${priorityLabels[t.priority]}</span></td>
+      <td><span class="badge ${statusBadge[t.status]}">${statusLabels[t.status]}</span></td>
+      <td>${new Date(t.created_at).toLocaleDateString('pt-BR')}</td>
+    </tr>
+  `).join('');
+}
+
+async function loadNotifications(userId) {
+  const { count } = await supabaseClient
+    .from('notifications')
+    .select('*', { count: 'exact', head: true })
+    .eq('profile_id', userId)
+    .eq('read', false);
+
+  if (count > 0) {
+    const badge = document.getElementById('notif-count');
+    badge.textContent = count;
+    badge.style.display = 'flex';
+  }
+}
+
+// Logout
+document.getElementById('btn-logout').addEventListener('click', async () => {
+  await supabaseClient.auth.signOut();
+  window.location.href = '../../index.html';
+});
+
+init();
+</script>
+
+</body>
+</html>
