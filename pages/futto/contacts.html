@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FuttoDesk — Contatos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../css/main.css" />
+</head>
+<body>
+
+<div class="app-layout">
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-icon">F</div>
+      <span class="sidebar-brand-name">FuttoDesk</span>
+    </div>
+    <nav class="sidebar-nav">
+      <span class="nav-section-label">Atendimento</span>
+      <a href="dashboard.html" class="nav-item"><span class="nav-icon">⊞</span> Dashboard</a>
+      <a href="tickets.html" class="nav-item"><span class="nav-icon">🎫</span> Chamados</a>
+      <span class="nav-section-label">Cadastros</span>
+      <a href="companies.html" class="nav-item"><span class="nav-icon">🏢</span> Empresas</a>
+      <a href="contacts.html" class="nav-item active"><span class="nav-icon">👤</span> Contatos</a>
+      <a href="agents.html" class="nav-item"><span class="nav-icon">👥</span> Agentes</a>
+      <span class="nav-section-label">Sistema</span>
+      <a href="settings.html" class="nav-item"><span class="nav-icon">⚙</span> Configurações</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-user-avatar" id="user-avatar">N</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name" id="user-name">Carregando...</div>
+          <div class="sidebar-user-role" id="user-role">Agente</div>
+        </div>
+      </div>
+      <button class="nav-item" id="btn-logout" style="width:100%;margin-top:4px;background:none;border:none;cursor:pointer;color:rgba(255,255,255,0.4);font-size:13px;text-align:left;">
+        <span class="nav-icon">→</span> Sair
+      </button>
+    </div>
+  </aside>
+
+  <div class="main-content">
+
+    <div class="topbar">
+      <span class="topbar-title">Contatos</span>
+      <div class="topbar-actions">
+        <input class="form-input" type="text" id="search-input" placeholder="Buscar contato..." style="width:220px;height:36px;" />
+        <button class="btn btn-primary btn-sm" id="btn-new-contact">+ Novo contato</button>
+      </div>
+    </div>
+
+    <div class="page-content">
+
+      <!-- MODAL CONTATO -->
+      <div id="modal-contact" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;align-items:center;justify-content:center;">
+        <div class="card" style="width:100%;max-width:560px;margin:24px;max-height:90vh;overflow-y:auto;">
+          <div class="card-header" style="position:sticky;top:0;background:var(--bg-card);z-index:1;">
+            <span class="card-title" id="modal-contact-title">Novo contato</span>
+            <button id="btn-close-contact" style="background:none;border:none;cursor:pointer;font-size:20px;color:var(--text-muted);">×</button>
+          </div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:16px;">
+            <input type="hidden" id="contact-id" />
+            <input type="hidden" id="contact-profile-id" />
+
+            <div class="form-group">
+              <label class="form-label">Nome completo *</label>
+              <input class="form-input" type="text" id="contact-name" placeholder="Nome do contato" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">E-mail *</label>
+              <input class="form-input" type="email" id="contact-email" placeholder="email@empresa.com.br" />
+              <span style="font-size:12px;color:var(--text-muted);">O contato receberá um e-mail para criar a senha de acesso.</span>
+            </div>
+
+            <div style="border-top:1px solid var(--border-default);padding-top:16px;">
+              <div style="font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:12px;">Empresas vinculadas</div>
+              <div id="company-links" style="display:flex;flex-direction:column;gap:8px;">
+                <!-- vínculos adicionados dinamicamente -->
+              </div>
+              <button class="btn btn-secondary btn-sm" id="btn-add-link" style="margin-top:8px;">+ Adicionar empresa</button>
+            </div>
+
+            <div id="contact-error" class="alert alert-error" style="display:none;"></div>
+            <div id="contact-success" class="alert alert-success" style="display:none;"></div>
+
+            <div style="display:flex;gap:8px;justify-content:flex-end;">
+              <button class="btn btn-secondary" id="btn-cancel-contact">Cancelar</button>
+              <button class="btn btn-primary" id="btn-save-contact">Salvar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABELA -->
+      <div class="card">
+        <div class="table-wrapper">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>E-mail</th>
+                <th>Empresas</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="contacts-tbody">
+              <tr>
+                <td colspan="5">
+                  <div class="empty-state">
+                    <div class="empty-state-icon">👤</div>
+                    <div class="empty-state-title">Carregando...</div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="../../js/config.js"></script>
+<script>
+
+let allContacts = [];
+let allCompanies = [];
+let linkRows = [];
+
+async function init() {
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (!session) { window.location.href = '../../index.html'; return; }
+
+  const { data: profile } = await supabaseClient
+    .from('profiles').select('name, type').eq('id', session.user.id).single();
+
+  if (!profile || profile.type !== 'agent') { window.location.href = '../../index.html'; return; }
+
+  document.getElementById('user-name').textContent = profile.name;
+  document.getElementById('user-avatar').textContent = profile.name.charAt(0).toUpperCase();
+
+  await loadData();
+}
+
+async function loadData() {
+  const [{ data: contacts }, { data: members }, { data: companies }] = await Promise.all([
+    supabaseClient.from('profiles').select('*').eq('type', 'contact').order('name'),
+    supabaseClient.from('company_members').select('*, companies(id, name, cnpj)'),
+    supabaseClient.from('companies').select('id, name, cnpj').eq('active', true).order('name')
+  ]);
+
+  allCompanies = companies ?? [];
+
+  // Agrupa membros por profile_id
+  const membersByProfile = {};
+  (members ?? []).forEach(m => {
+    if (!membersByProfile[m.profile_id]) membersByProfile[m.profile_id] = [];
+    membersByProfile[m.profile_id].push(m);
+  });
+
+  allContacts = (contacts ?? []).map(c => ({
+    ...c,
+    members: membersByProfile[c.id] ?? []
+  }));
+
+  renderContacts(allContacts);
+}
+
+function renderContacts(contacts) {
+  const tbody = document.getElementById('contacts-tbody');
+
+  if (!contacts || contacts.length === 0) {
+    tbody.innerHTML = `
+      <tr><td colspan="5">
+        <div class="empty-state">
+          <div class="empty-state-icon">👤</div>
+          <div class="empty-state-title">Nenhum contato cadastrado</div>
+          <div class="empty-state-desc">Clique em "Novo contato" para começar.</div>
+        </div>
+      </td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = contacts.map(c => {
+    const companies = c.members.map(m =>
+      `<span class="badge badge-open" style="margin:2px;">${m.companies?.name ?? '—'} <span style="opacity:0.7">${m.role === 'admin' ? '(admin)' : ''}</span></span>`
+    ).join('');
+
+    return `
+      <tr>
+        <td style="font-weight:500;">${c.name}</td>
+        <td style="color:var(--text-secondary);">${c.email}</td>
+        <td>${companies || '<span style="color:var(--text-muted);">Sem vínculo</span>'}</td>
+        <td><span class="badge ${c.active ? 'badge-resolved' : 'badge-closed'}">${c.active ? 'Ativo' : 'Inativo'}</span></td>
+        <td style="text-align:right;">
+          <button class="btn btn-secondary btn-sm" onclick="openEditContact('${c.id}')">Editar</button>
+        </td>
+      </tr>`;
+  }).join('');
+}
+
+// =============================================
+// MODAL
+// =============================================
+
+function openNewContact() {
+  document.getElementById('contact-id').value = '';
+  document.getElementById('contact-profile-id').value = '';
+  document.getElementById('contact-name').value = '';
+  document.getElementById('contact-email').value = '';
+  document.getElementById('contact-email').disabled = false;
+  document.getElementById('contact-error').style.display = 'none';
+  document.getElementById('contact-success').style.display = 'none';
+  document.getElementById('modal-contact-title').textContent = 'Novo contato';
+  linkRows = [];
+  renderLinkRows();
+  document.getElementById('modal-contact').style.display = 'flex';
+}
+
+async function openEditContact(profileId) {
+  const contact = allContacts.find(c => c.id === profileId);
+  if (!contact) return;
+
+  document.getElementById('contact-id').value = contact.id;
+  document.getElementById('contact-profile-id').value = contact.id;
+  document.getElementById('contact-name').value = contact.name;
+  document.getElementById('contact-email').value = contact.email;
+  document.getElementById('contact-email').disabled = true;
+  document.getElementById('contact-error').style.display = 'none';
+  document.getElementById('contact-success').style.display = 'none';
+  document.getElementById('modal-contact-title').textContent = 'Editar contato';
+
+  linkRows = contact.members.map(m => ({
+    id: m.id,
+    company_id: m.company_id,
+    role: m.role
+  }));
+
+  renderLinkRows();
+  document.getElementById('modal-contact').style.display = 'flex';
+}
+
+function closeContactModal() {
+  document.getElementById('modal-contact').style.display = 'none';
+}
+
+function renderLinkRows() {
+  const container = document.getElementById('company-links');
+
+  if (linkRows.length === 0) {
+    container.innerHTML = `<div style="font-size:13px;color:var(--text-muted);">Nenhuma empresa vinculada.</div>`;
+    return;
+  }
+
+  container.innerHTML = linkRows.map((row, i) => `
+    <div style="display:flex;gap:8px;align-items:center;">
+      <select class="form-input" style="flex:1;" onchange="linkRows[${i}].company_id = this.value">
+        <option value="">Selecione a empresa</option>
+        ${allCompanies.map(c =>
+          `<option value="${c.id}" ${row.company_id === c.id ? 'selected' : ''}>${c.name}</option>`
+        ).join('')}
+      </select>
+      <select class="form-input" style="width:120px;" onchange="linkRows[${i}].role = this.value">
+        <option value="member" ${row.role === 'member' ? 'selected' : ''}>Membro</option>
+        <option value="admin" ${row.role === 'admin' ? 'selected' : ''}>Admin</option>
+      </select>
+      <button class="btn btn-danger btn-sm" onclick="removeLinkRow(${i})">✕</button>
+    </div>
+  `).join('');
+}
+
+function addLinkRow() {
+  linkRows.push({ id: null, company_id: '', role: 'member' });
+  renderLinkRows();
+}
+
+function removeLinkRow(index) {
+  linkRows.splice(index, 1);
+  renderLinkRows();
+}
+
+async function saveContact() {
+  const profileId = document.getElementById('contact-profile-id').value;
+  const name = document.getElementById('contact-name').value.trim();
+  const email = document.getElementById('contact-email').value.trim();
+  const errorEl = document.getElementById('contact-error');
+  const successEl = document.getElementById('contact-success');
+
+  errorEl.style.display = 'none';
+  successEl.style.display = 'none';
+
+  if (!name || !email) {
+    errorEl.textContent = 'Nome e e-mail são obrigatórios.';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  const invalidLinks = linkRows.filter(r => !r.company_id);
+  if (invalidLinks.length > 0) {
+    errorEl.textContent = 'Selecione a empresa para todos os vínculos.';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  const btn = document.getElementById('btn-save-contact');
+  btn.disabled = true;
+  btn.textContent = 'Salvando...';
+
+  try {
+    if (!profileId) {
+      // Novo contato — cria usuário no Supabase Auth
+      const { data: authData, error: authError } = await supabaseClient.auth.admin
+        ? { data: null, error: { message: 'Use o convite por e-mail' } }
+        : { data: null, error: null };
+
+      // Usa invite por e-mail (fluxo correto para novos usuários)
+      const { error: inviteError } = await supabaseClient.auth.signInWithOtp({
+        email,
+        options: { shouldCreateUser: true }
+      });
+
+      if (inviteError && !inviteError.message.includes('already')) {
+        throw inviteError;
+      }
+
+      // Verifica se o perfil já existe
+      const { data: existing } = await supabaseClient
+        .from('profiles').select('id').eq('email', email).single();
+
+      if (!existing) {
+        errorEl.textContent = 'Envie o convite e aguarde o contato confirmar o e-mail antes de vinculá-lo a empresas.';
+        errorEl.style.display = 'block';
+
+        successEl.textContent = `Convite enviado para ${email}. O contato deve confirmar o e-mail para acessar o sistema.`;
+        successEl.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Salvar';
+        return;
+      }
+
+      // Atualiza perfil
+      await supabaseClient.from('profiles').update({ name, type: 'contact' }).eq('id', existing.id);
+
+      // Salva vínculos
+      await saveLinks(existing.id);
+
+    } else {
+      // Editar contato existente
+      await supabaseClient.from('profiles').update({ name }).eq('id', profileId);
+      await saveLinks(profileId);
+    }
+
+    await loadData();
+    closeContactModal();
+
+  } catch (err) {
+    errorEl.textContent = err.message ?? 'Erro ao salvar contato.';
+    errorEl.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Salvar';
+  }
+}
+
+async function saveLinks(profileId) {
+  // Remove vínculos existentes e recria
+  await supabaseClient.from('company_members').delete().eq('profile_id', profileId);
+
+  const toInsert = linkRows
+    .filter(r => r.company_id)
+    .map(r => ({
+      profile_id: profileId,
+      company_id: r.company_id,
+      role: r.role
+    }));
+
+  if (toInsert.length > 0) {
+    await supabaseClient.from('company_members').insert(toInsert);
+  }
+}
+
+// =============================================
+// BUSCA
+// =============================================
+
+document.getElementById('search-input').addEventListener('input', function() {
+  const q = this.value.toLowerCase();
+  const filtered = allContacts.filter(c =>
+    c.name.toLowerCase().includes(q) ||
+    c.email.toLowerCase().includes(q)
+  );
+  renderContacts(filtered);
+});
+
+// =============================================
+// EVENTOS
+// =============================================
+
+document.getElementById('btn-new-contact').addEventListener('click', openNewContact);
+document.getElementById('btn-close-contact').addEventListener('click', closeContactModal);
+document.getElementById('btn-cancel-contact').addEventListener('click', closeContactModal);
+document.getElementById('btn-save-contact').addEventListener('click', saveContact);
+document.getElementById('btn-add-link').addEventListener('click', addLinkRow);
+
+document.getElementById('btn-logout').addEventListener('click', async () => {
+  await supabaseClient.auth.signOut();
+  window.location.href = '../../index.html';
+});
+
+init();
+</script>
+
+</body>
+</html>
