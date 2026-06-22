@@ -1,0 +1,15 @@
+# Configurações locais
+config.local.js
+.env
+*.env
+
+# Sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# VS Code
+.vscode/settings.json
+
+# Logs
+*.log
